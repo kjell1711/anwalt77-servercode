@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Anwalt77 Bewerbung</title>
+<style>
+    /* iOS modernes Schwarz-Weiß-Design */
+    body {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        background-color: #000;
+        color: #fff;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: flex-start;
+        min-height: 100vh;
+    }
+
+    h1 {
+        margin-top: 50px;
+        font-size: 2.5rem;
+        letter-spacing: 1px;
+    }
+
+    button {
+        margin-top: 50px;
+        padding: 15px 30px;
+        font-size: 1.2rem;
+        border-radius: 20px;
+        border: none;
+        background-color: #fff;
+        color: #000;
+        font-weight: bold;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        box-shadow: 0 4px 12px rgba(255,255,255,0.2);
+    }
+
+    button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 16px rgba(255,255,255,0.3);
+    }
+
+    /* Modal Styles */
+    .modal {
+        display: none;
+        position: fixed;
+        z-index: 1000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        overflow: auto;
+        background-color: rgba(0,0,0,0.6);
+        align-items: center;
+        justify-content: center;
+        animation: fadeIn 0.3s ease forwards;
+    }
+
+    @keyframes fadeIn {
+        from {opacity: 0;}
+        to {opacity: 1;}
+    }
+
+    .modal-content {
+        background-color: #111;
+        padding: 30px 25px;
+        border-radius: 30px;
+        width: 90%;
+        max-width: 400px;
+        text-align: center;
+        box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+        transform: translateY(-30px);
+        animation: slideDown 0.3s ease forwards;
+    }
+
+    @keyframes slideDown {
+        from {transform: translateY(-30px);}
+        to {transform: translateY(0);}
+    }
+
+    input[type="text"], select {
+        width: 100%;
+        padding: 15px 12px;
+        margin: 12px 0;
+        border-radius: 15px;
+        border: none;
+        font-size: 1rem;
+        background-color: #222;
+        color: #fff;
+        transition: all 0.2s ease;
+    }
+
+    input[type="text"]:focus, select:focus {
+        outline: none;
+        box-shadow: 0 0 0 2px #fff;
+        background-color: #333;
+    }
+
+    .modal button {
+        margin-top: 20px;
+        width: 100%;
+        padding: 15px;
+        font-size: 1.1rem;
+        border-radius: 15px;
+        background-color: #fff;
+        color: #000;
+        font-weight: bold;
+        cursor: pointer;
+        box-shadow: 0 4px 12px rgba(255,255,255,0.2);
+    }
+
+    .modal button:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 6px 16px rgba(255,255,255,0.3);
+    }
+
+    .hidden {
+        display: none;
+    }
+
+    label {
+        display: block;
+        text-align: left;
+        margin-top: 10px;
+        font-weight: 500;
+    }
+
+    .radio-group {
+        display: flex;
+        justify-content: space-around;
+        margin-top: 10px;
+    }
+
+    .radio-group label {
+        flex: 1;
+        text-align: center;
+    }
+</style>
+</head>
+<body>
+
+<h1>Anwalt77</h1>
+<button id="startBtn">Server Bewerbung</button>
+
+<div id="modal" class="modal">
+    <div class="modal-content" id="step1">
+        <h2>Servercode eingeben</h2>
+        <input type="text" id="serverCode" maxlength="6" placeholder="6 Buchstaben" style="text-transform: uppercase;" />
+        <button id="submitCode">Weiter</button>
+    </div>
+
+    <div class="modal-content hidden" id="step2">
+        <h2>Bewerbungsformular</h2>
+        <label>Roblox Username:</label>
+        <input type="text" id="robloxUsername" />
+
+        <label>Warum ist der Server besonders?</label>
+        <input type="text" id="serverSpecial" />
+
+        <label>Welche Art Server?</label>
+        <select id="serverType">
+            <option value="Event">Event</option>
+            <option value="RP">RP</option>
+            <option value="Racing">Racing</option>
+        </select>
+
+        <label>Welche Rolle hast du?</label>
+        <select id="role">
+            <option value="Admin">Admin</option>
+            <option value="Owner">Owner</option>
+            <option value="Spieler">Spieler</option>
+        </select>
+
+        <label>Bist du schon auf Anwalt77s Discord?</label>
+        <div class="radio-group">
+            <label><input type="radio" name="discord" value="Ja"> Ja</label>
+            <label><input type="radio" name="discord" value="Nein"> Nein</label>
+        </div>
+
+        <button id="submitForm">Absenden</button>
+    </div>
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+    const DISCORD_WEBHOOK_URL = "DEIN_DISCORD_WEBHOOK_HIER";
+
+    const startBtn = document.getElementById('startBtn');
+    const modal = document.getElementById('modal');
+    const step1 = document.getElementById('step1');
+    const step2 = document.getElementById('step2');
+    const submitCode = document.getElementById('submitCode');
+    const submitForm = document.getElementById('submitForm');
+
+    const LOCAL_STORAGE_KEY = "anwalt77_lastSubmission";
+
+    function canSubmit() {
+        const last = localStorage.getItem(LOCAL_STORAGE_KEY);
+        if (!last) return true;
+        const lastTime = new Date(last);
+        const now = new Date();
+        const diffHours = (now - lastTime) / 1000 / 60 / 60;
+        return diffHours >= 24;
+    }
+
+    function updateSubmitTime() {
+        localStorage.setItem(LOCAL_STORAGE_KEY, new Date().toISOString());
+    }
+
+    startBtn.addEventListener('click', () => {
+        if (!canSubmit()) {
+            const last = new Date(localStorage.getItem(LOCAL_STORAGE_KEY));
+            const nextAllowed = new Date(last.getTime() + 24*60*60*1000);
+            alert(`Du kannst erst wieder am ${nextAllowed.toLocaleString()} eine Bewerbung abschicken.`);
+            return;
+        }
+        modal.style.display = 'flex';
+    });
+
+    submitCode.addEventListener('click', () => {
+        const code = document.getElementById('serverCode').value.toUpperCase();
+        const regex = /^[A-Z]{6}$/;
+        if (!regex.test(code)) {
+            alert("Bitte genau 6 Buchstaben (A-Z) eingeben.");
+            return;
+        }
+        step1.classList.add('hidden');
+        step2.classList.remove('hidden');
+    });
+
+    submitForm.addEventListener('click', () => {
+        const username = document.getElementById('robloxUsername').value;
+        const serverSpecial = document.getElementById('serverSpecial').value;
+        const serverType = document.getElementById('serverType').value;
+        const role = document.getElementById('role').value;
+        const discord = document.querySelector('input[name="discord"]:checked')?.value || "Nein";
+        const serverCode = document.getElementById('serverCode').value.toUpperCase();
+
+        if (!username || !serverSpecial) {
+            alert("Bitte alle Felder ausfüllen.");
+            return;
+        }
+
+        const payload = {
+            content: `**Neue Server Bewerbung**\n**Servercode:** ${serverCode}\n**Roblox Username:** ${username}\n**Warum ist der Server besonders:** ${serverSpecial}\n**Server Typ:** ${serverType}\n**Rolle:** ${role}\n**Auf Discord:** ${discord}`
+        };
+
+        fetch(DISCORD_WEBHOOK_URL, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload)
+        }).then(() => {
+            alert("Bewerbung erfolgreich abgeschickt!");
+            updateSubmitTime();
+            modal.style.display = 'none';
+            step1.classList.remove('hidden');
+            step2.classList.add('hidden');
+            document.getElementById('serverCode').value = '';
+            document.getElementById('robloxUsername').value = '';
+            document.getElementById('serverSpecial').value = '';
+        }).catch(() => {
+            alert("Fehler beim Senden der Bewerbung!");
+        });
+    });
+
+    window.addEventListener('click', (e) => {
+        if (e.target === modal) {
+            modal.style.display = 'none';
+            step1.classList.remove('hidden');
+            step2.classList.add('hidden');
+        }
+    });
+});
+</script>
+
+</body>
+</html>
