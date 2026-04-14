@@ -21,6 +21,7 @@ h1 {
     margin-top: 50px;
     font-size: 2.5rem;
     letter-spacing: 1px;
+    cursor: pointer;
 }
 button {
     margin-top: 50px;
@@ -35,9 +36,12 @@ button {
     transition: all 0.2s ease;
     box-shadow: 0 4px 12px rgba(255,255,255,0.2);
 }
-button:hover {
+button:hover:not(:disabled) {
     transform: translateY(-2px);
     box-shadow: 0 6px 16px rgba(255,255,255,0.3);
+}
+button:disabled {
+    cursor: default;
 }
 .modal {
     display: none;
@@ -84,7 +88,7 @@ label { display: block; text-align: left; margin-top: 10px; font-weight: 500; }
 </head>
 <body>
 
-<h1>Anwalt77</h1>
+<h1 id="title">Anwalt77</h1>
 <button id="startBtn">Server Bewerbung</button>
 
 <div id="modal" class="modal">
@@ -136,8 +140,11 @@ document.addEventListener("DOMContentLoaded", () => {
     const step2 = document.getElementById('step2');
     const submitCode = document.getElementById('submitCode');
     const submitForm = document.getElementById('submitForm');
+    const title = document.getElementById('title');
 
     const LOCAL_STORAGE_KEY = "anwalt77_lastSubmission";
+
+    let titleClicks = 0;
 
     function canSubmit() {
         const last = localStorage.getItem(LOCAL_STORAGE_KEY);
@@ -177,6 +184,17 @@ document.addEventListener("DOMContentLoaded", () => {
         }, 1000);
     }
 
+    // Easter Egg: Klick auf Titel
+    title.addEventListener('click', () => {
+        titleClicks++;
+        if (titleClicks >= 5) {
+            localStorage.removeItem(LOCAL_STORAGE_KEY);
+            alert("Cooldown zurückgesetzt! Du kannst wieder bewerben.");
+            disableButtonWithCountdown();
+            titleClicks = 0;
+        }
+    });
+
     if (!canSubmit()) disableButtonWithCountdown();
 
     startBtn.addEventListener('click', () => {
@@ -204,8 +222,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
         if (!username || !serverSpecial) return alert("Bitte alle Felder ausfüllen.");
 
+        // Schöne Nachricht mit Markdown und Emojis
         const payload = {
-            content: `**Neue Server Bewerbung**\n**Servercode:** ${serverCode}\n**Roblox Username:** ${username}\n**Warum ist der Server besonders:** ${serverSpecial}\n**Server Typ:** ${serverType}\n**Rolle:** ${role}\n**Auf Discord:** ${discord}`
+            content: `📝 **Neue Server Bewerbung**\n\n**Servercode:** ${serverCode}\n**Roblox Username:** ${username}\n**Warum ist der Server besonders:** ${serverSpecial}\n**Server Typ:** ${serverType}\n**Rolle:** ${role}\n**Auf Discord:** ${discord}`
         };
 
         fetch(DISCORD_WEBHOOK_URL, {
@@ -213,7 +232,7 @@ document.addEventListener("DOMContentLoaded", () => {
             headers:{"Content-Type":"application/json"},
             body: JSON.stringify(payload)
         }).then(()=>{
-            alert("Bewerbung erfolgreich abgeschickt!");
+            alert("✅ Bewerbung erfolgreich abgeschickt!");
             updateSubmitTime();
             modal.style.display='none';
             step1.classList.remove('hidden');
@@ -222,7 +241,7 @@ document.addEventListener("DOMContentLoaded", () => {
             document.getElementById('robloxUsername').value='';
             document.getElementById('serverSpecial').value='';
             disableButtonWithCountdown();
-        }).catch(()=>alert("Fehler beim Senden der Bewerbung!"));
+        }).catch(()=>alert("❌ Fehler beim Senden der Bewerbung!"));
     });
 
     window.addEventListener('click',(e)=>{
